@@ -1,4 +1,4 @@
-# E-V-E-P-diagram-multiple-plot
+# E-V and E-P diagram with multiple plotting
 
 Put all these files in the same diractory 
 

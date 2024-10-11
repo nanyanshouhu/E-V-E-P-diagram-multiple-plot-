@@ -4,30 +4,30 @@ from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 import pandas as pd
 N=1
-# 定义计算离散点导数的函数
-def cal_deriv(x, y):                  # x, y的类型均为列表
-    diff_x = []                       # 用来存储x列表中的两数之差
+# Define a function to calculate discrete point derivatives
+def cal_deriv(x, y):                  # x and y are both lists
+    diff_x = []                       # Used to store the difference between two numbers in the x list
     for i, j in zip(x[0::], x[1::]):
         diff_x.append(j - i)
 
-    diff_y = []                       # 用来存储y列表中的两数之差
+    diff_y = []                       # Used to store the difference between two numbers in the y list
     for i, j in zip(y[0::], y[1::]):
         diff_y.append(j - i)
 
-    slopes = []                       # 用来存储斜率
+    slopes = []                       # Used to store the slopes
     for i in range(len(diff_y)):
         slopes.append(diff_y[i] / diff_x[i])
 
-    deriv = []                        # 用来存储一阶导数
+    deriv = []                        # Used to store the first derivative
     for i, j in zip(slopes[0::], slopes[1::]):
-        deriv.append((0.5 * (i + j)))  # 根据离散点导数的定义，计算并存储结果
-    deriv.insert(0, slopes[0])        # (左)端点的导数即为与其最近点的斜率
-    deriv.append(slopes[-1])          # (右)端点的导数即为与其最近点的斜率
+        deriv.append((0.5 * (i + j)))  # Calculate and store the result according to the definition of the discrete point derivative
+    deriv.insert(0, slopes[0])        # The derivative at the (left) end is the slope with its nearest point
+    deriv.append(slopes[-1])          # The derivative at the (right) end is the slope with its nearest point
 
-    for i in deriv:                   # 打印结果，方便检查，调用时也可注释掉
+    for i in deriv:                   # Print the result for easy checking (can be commented out when calling)
         print(i)
 
-    return deriv                      # 返回存储一阶导数结果的列表
+    return deriv                      # Return the list storing the first derivative results
 def read_data(filename):
     """ read the energy and Volume, the format shows as follow: 
     the first line are structure factors, the second line are volumes, and the third lines are energy:
@@ -46,10 +46,19 @@ def read_data(filename):
     data = np.loadtxt(filename)
     return data[:,1], data[:,2] 
 def eos_murnaghan(vol, E0, B0, BP, V0):
-    """ imput the volumes and equation and return the energy 
-    Birch-Murnaghan equation：Phys. Rev. B 1983, 28 (10), 5480–5486.
-    """
-    return E0 + B0*vol/BP*(((V0/vol)**BP)/(BP-1)+1) - V0*B0/(BP-1)
+    # First term in the equation
+    term1 = (4 * B0 * V0) / (BP - 1)**2
+    
+    # Second term in the equation
+    term2 = 1 - (3 / 2) * (BP - 1) * (1 - (vol / V0)**(1 / 3))
+    
+    # Exponential term
+    exp_term = np.exp((3 / 2) * (BP - 1) * (1 - (vol / V0)**(1 / 3)))
+    
+    # Energy calculation
+    E = E0 + term1 - term1 * term2 * exp_term
+    
+    return E
 def fit_murnaghan(volume, energy):
     """ fittint Murnaghan equation，and return the optimized parameters 
     """
